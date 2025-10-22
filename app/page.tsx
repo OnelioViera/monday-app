@@ -299,10 +299,8 @@ export default function FlowBoard() {
       const item = items.find(i => i.id === itemId);
       if (!item) return;
       
-      const currentTags = item.tags || [];
-      if (currentTags.includes(tagName)) return; // Don't add duplicates
-      
-      const updatedTags = [...currentTags, tagName];
+      // Only one tag at a time - replace existing tag
+      const updatedTags = [tagName];
       
       await fetch(`/api/items/${itemId}`, {
         method: 'PUT',
@@ -827,23 +825,23 @@ export default function FlowBoard() {
                             <td className="p-4">
                               {editingTags === item.id ? (
                                 <div className="space-y-2">
-                                  <div className="flex flex-wrap gap-1 mb-2">
-                                    {(item.tags || []).map((tag, i) => (
-                                      <div
-                                        key={i}
-                                        className={`flex items-center gap-1 px-2 py-0.5 ${getTagColor(tag)} text-white text-xs font-medium rounded`}
-                                      >
-                                        <span>{tag}</span>
+                                  {item.tags && item.tags.length > 0 && (
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="text-xs text-gray-500">Current:</span>
+                                      <div className="flex items-center gap-1">
+                                        <span className={`px-2 py-0.5 ${getTagColor(item.tags[0])} text-white text-xs font-medium rounded`}>
+                                          {item.tags[0]}
+                                        </span>
                                         <button
-                                          onClick={() => removeTag(item.id, tag)}
-                                          className="hover:bg-white/20 rounded-full p-0.5"
+                                          onClick={() => item.tags && removeTag(item.id, item.tags[0])}
+                                          className="p-1 text-red-600 hover:bg-red-50 rounded-full"
                                           title="Remove tag"
                                         >
-                                          <X className="w-2.5 h-2.5" />
+                                          <X className="w-3 h-3" />
                                         </button>
                                       </div>
-                                    ))}
-                                  </div>
+                                    </div>
+                                  )}
                                   <div className="flex gap-1 mb-2">
                                     <input
                                       type="text"
@@ -868,7 +866,7 @@ export default function FlowBoard() {
                                   </div>
                                   <div className="flex flex-wrap gap-1 mb-1">
                                     <div className="text-xs text-gray-500 w-full mb-1 flex items-center justify-between">
-                                      <span>Quick add:</span>
+                                      <span>Select tag (replaces current):</span>
                                       <button
                                         onClick={() => setShowTagManagerModal(true)}
                                         className="text-blue-600 hover:text-blue-700 text-xs"
@@ -906,20 +904,15 @@ export default function FlowBoard() {
                                   onClick={() => setEditingTags(item.id)}
                                   className="cursor-pointer hover:bg-gray-50 rounded p-1 -m-1 min-h-[24px]"
                                 >
-                                  <div className="flex flex-wrap gap-1">
-                                    {item.tags && item.tags.length > 0 ? (
-                                      item.tags.map((tag, i) => (
-                                        <span
-                                          key={i}
-                                          className={`px-2 py-0.5 ${getTagColor(tag)} text-white text-xs font-medium rounded`}
-                                        >
-                                          {tag}
-                                        </span>
-                                      ))
-                                    ) : (
-                                      <span className="text-gray-400 text-xs hover:text-blue-600">Click to add tags</span>
-                                    )}
-                                  </div>
+                                  {item.tags && item.tags.length > 0 ? (
+                                    <span
+                                      className={`px-2 py-0.5 ${getTagColor(item.tags[0])} text-white text-xs font-medium rounded inline-block`}
+                                    >
+                                      {item.tags[0]}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs hover:text-blue-600">Click to add tag</span>
+                                  )}
                                 </div>
                               )}
                             </td>
@@ -989,15 +982,12 @@ export default function FlowBoard() {
                                 </div>
                               </div>
                               {item.tags && item.tags.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-1">
-                                  {item.tags.map((tag, i) => (
-                                    <span
-                                      key={i}
-                                      className={`px-2 py-0.5 ${getTagColor(tag)} text-white text-xs font-medium rounded`}
-                                    >
-                                      {tag}
-                                    </span>
-                                  ))}
+                                <div className="mt-2">
+                                  <span
+                                    className={`px-2 py-0.5 ${getTagColor(item.tags[0])} text-white text-xs font-medium rounded inline-block`}
+                                  >
+                                    {item.tags[0]}
+                                  </span>
                                 </div>
                               )}
                               {item.dueDate && (
