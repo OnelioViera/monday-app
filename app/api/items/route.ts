@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       status: body.status || 'todo',
       priority: body.priority || 'medium',
       assignee: body.assignee || [],
+      projectManagers: body.projectManagers || [],
       dueDate: body.dueDate || '',
       progress: body.progress || 0,
       description: body.description || '',

@@ -17,9 +17,9 @@ export interface Item {
   status: 'todo' | 'in-progress' | 'done';
   priority: 'low' | 'medium' | 'high';
   assignee: string[];
+  projectManagers: string[];
   dueDate: string;
   progress: number;
-  tags?: string[];
   description: string;
   createdAt?: Date;
   updatedAt?: Date;

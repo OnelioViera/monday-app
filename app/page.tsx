@@ -20,41 +20,10 @@ export default function FlowBoard() {
   const [loading, setLoading] = useState(true);
   const [editingAssignee, setEditingAssignee] = useState<string | null>(null);
   const [newAssigneeName, setNewAssigneeName] = useState('');
-  const [editingTags, setEditingTags] = useState<string | null>(null);
-  const [newTagName, setNewTagName] = useState('');
-  const [showTagManagerModal, setShowTagManagerModal] = useState(false);
-  const [newCustomTagName, setNewCustomTagName] = useState('');
-  const [newCustomTagColor, setNewCustomTagColor] = useState('bg-blue-500');
+  const [editingProjectManager, setEditingProjectManager] = useState<string | null>(null);
+  const [newProjectManagerName, setNewProjectManagerName] = useState('');
   
   const iconOptions = ['📁', '📊', '🚀', '💬', '🎯', '💡', '🔥', '⭐', '🎨', '📈', '🛠️', '📝'];
-  
-  const defaultTags = [
-    { name: 'Blocked', color: 'bg-red-500' },
-    { name: 'Review', color: 'bg-yellow-500' },
-    { name: 'Testing', color: 'bg-purple-500' },
-    { name: 'Bug', color: 'bg-orange-500' },
-    { name: 'Feature', color: 'bg-green-500' },
-    { name: 'Design', color: 'bg-pink-500' },
-    { name: 'Backend', color: 'bg-indigo-500' },
-    { name: 'Frontend', color: 'bg-cyan-500' },
-    { name: 'Urgent', color: 'bg-red-600' },
-    { name: 'Documentation', color: 'bg-blue-500' },
-  ];
-  
-  const [predefinedTags, setPredefinedTags] = useState<Array<{ name: string; color: string }>>(defaultTags);
-  
-  const availableColors = [
-    { name: 'Red', value: 'bg-red-500' },
-    { name: 'Orange', value: 'bg-orange-500' },
-    { name: 'Yellow', value: 'bg-yellow-500' },
-    { name: 'Green', value: 'bg-green-500' },
-    { name: 'Blue', value: 'bg-blue-500' },
-    { name: 'Indigo', value: 'bg-indigo-500' },
-    { name: 'Purple', value: 'bg-purple-500' },
-    { name: 'Pink', value: 'bg-pink-500' },
-    { name: 'Cyan', value: 'bg-cyan-500' },
-    { name: 'Gray', value: 'bg-gray-500' },
-  ];
   
   const statusOptions: StatusOption[] = [
     { value: 'todo', label: 'To Do', color: 'bg-gray-500' },
@@ -71,31 +40,9 @@ export default function FlowBoard() {
   // Fetch boards on mount
   useEffect(() => {
     fetchBoards();
-    loadCustomTags();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  // Load custom tags from localStorage
-  const loadCustomTags = () => {
-    try {
-      const saved = localStorage.getItem('flowboard_custom_tags');
-      if (saved) {
-        setPredefinedTags(JSON.parse(saved));
-      }
-    } catch (error) {
-      console.error('Error loading custom tags:', error);
-    }
-  };
-  
-  // Save custom tags to localStorage
-  const saveCustomTags = (tags: Array<{ name: string; color: string }>) => {
-    try {
-      localStorage.setItem('flowboard_custom_tags', JSON.stringify(tags));
-      setPredefinedTags(tags);
-    } catch (error) {
-      console.error('Error saving custom tags:', error);
-    }
-  };
   
   // Fetch items when current board changes
   useEffect(() => {
@@ -294,79 +241,49 @@ export default function FlowBoard() {
     }
   };
   
-  const addTag = async (itemId: string, tagName: string) => {
+  const addProjectManager = async (itemId: string) => {
+    if (!newProjectManagerName.trim()) return;
+    
     try {
       const item = items.find(i => i.id === itemId);
       if (!item) return;
       
-      // Only one tag at a time - replace existing tag
-      const updatedTags = [tagName];
+      const updatedProjectManagers = [...(item.projectManagers || []), newProjectManagerName.trim()];
       
       await fetch(`/api/items/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tags: updatedTags }),
+        body: JSON.stringify({ projectManagers: updatedProjectManagers }),
       });
       
       setItems(items.map(i => 
-        i.id === itemId ? { ...i, tags: updatedTags } : i
+        i.id === itemId ? { ...i, projectManagers: updatedProjectManagers } : i
       ));
       
-      setNewTagName('');
+      setNewProjectManagerName('');
     } catch (error) {
-      console.error('Error adding tag:', error);
+      console.error('Error adding project manager:', error);
     }
   };
   
-  const removeTag = async (itemId: string, tagName: string) => {
+  const removeProjectManager = async (itemId: string, managerName: string) => {
     try {
       const item = items.find(i => i.id === itemId);
       if (!item) return;
       
-      const updatedTags = (item.tags || []).filter(t => t !== tagName);
+      const updatedProjectManagers = (item.projectManagers || []).filter(m => m !== managerName);
       
       await fetch(`/api/items/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tags: updatedTags }),
+        body: JSON.stringify({ projectManagers: updatedProjectManagers }),
       });
       
       setItems(items.map(i => 
-        i.id === itemId ? { ...i, tags: updatedTags } : i
+        i.id === itemId ? { ...i, projectManagers: updatedProjectManagers } : i
       ));
     } catch (error) {
-      console.error('Error removing tag:', error);
-    }
-  };
-  
-  const getTagColor = (tagName: string): string => {
-    const predefined = predefinedTags.find(t => t.name === tagName);
-    return predefined ? predefined.color : 'bg-gray-500';
-  };
-  
-  const addCustomTag = () => {
-    if (!newCustomTagName.trim()) return;
-    
-    const exists = predefinedTags.find(t => t.name.toLowerCase() === newCustomTagName.trim().toLowerCase());
-    if (exists) {
-      alert('A tag with this name already exists!');
-      return;
-    }
-    
-    const updatedTags = [...predefinedTags, { name: newCustomTagName.trim(), color: newCustomTagColor }];
-    saveCustomTags(updatedTags);
-    setNewCustomTagName('');
-    setNewCustomTagColor('bg-blue-500');
-  };
-  
-  const removeCustomTag = (tagName: string) => {
-    const updatedTags = predefinedTags.filter(t => t.name !== tagName);
-    saveCustomTags(updatedTags);
-  };
-  
-  const resetToDefaultTags = () => {
-    if (confirm('Reset to default tags? This will remove all your custom tags.')) {
-      saveCustomTags(defaultTags);
+      console.error('Error removing project manager:', error);
     }
   };
   
@@ -533,13 +450,6 @@ export default function FlowBoard() {
         </div>
         
         <div className="mt-auto p-4 border-t border-gray-200">
-          <button
-            onClick={() => setShowTagManagerModal(true)}
-            className="w-full mb-3 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 text-gray-700 rounded-lg hover:from-blue-100 hover:to-purple-100 transition-all flex items-center justify-center border border-gray-200"
-          >
-            <span className="mr-2">🏷️</span>
-            Manage Tags
-          </button>
           <div className="text-xs text-gray-400">
             <div>💡 Hover over boards to delete</div>
             <div className="mt-1">📝 Click on tasks to edit</div>
@@ -637,7 +547,7 @@ export default function FlowBoard() {
                           <th className="text-left p-4 font-medium text-gray-700">Priority</th>
                           <th className="text-left p-4 font-medium text-gray-700">Assignee</th>
                           <th className="text-left p-4 font-medium text-gray-700">Due Date</th>
-                          <th className="text-left p-4 font-medium text-gray-700">Tags</th>
+                          <th className="text-left p-4 font-medium text-gray-700">Project Managers</th>
                           <th className="text-left p-4 font-medium text-gray-700">Actions</th>
                         </tr>
                       </thead>
@@ -801,7 +711,11 @@ export default function FlowBoard() {
                                       <Plus className="w-3 h-3" />
                                     </button>
                                     <button
-                                      onClick={() => {
+                                      onClick={async () => {
+                                        // If there's text in the input, add it first
+                                        if (newAssigneeName.trim()) {
+                                          await addAssignee(item.id);
+                                        }
                                         setEditingAssignee(null);
                                         setNewAssigneeName('');
                                       }}
@@ -843,76 +757,57 @@ export default function FlowBoard() {
                               />
                             </td>
                             <td className="p-4">
-                              {editingTags === item.id ? (
+                              {editingProjectManager === item.id ? (
                                 <div className="space-y-2">
-                                  {item.tags && item.tags.length > 0 && (
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-xs text-gray-500">Current:</span>
-                                      <div className="flex items-center gap-1">
-                                        <span className={`px-2 py-0.5 ${getTagColor(item.tags[0])} text-white text-xs font-medium rounded`}>
-                                          {item.tags[0]}
-                                        </span>
+                                  <div className="flex flex-wrap gap-2 mb-2">
+                                    {(item.projectManagers || []).map((manager, i) => (
+                                      <div
+                                        key={i}
+                                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-br from-green-400 to-teal-400 text-white text-xs font-medium rounded-full"
+                                      >
+                                        <div className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center text-[10px] font-bold">
+                                          {getInitials(manager)}
+                                        </div>
+                                        <span>{manager}</span>
                                         <button
-                                          onClick={() => item.tags && removeTag(item.id, item.tags[0])}
-                                          className="p-1 text-red-600 hover:bg-red-50 rounded-full"
-                                          title="Remove tag"
+                                          onClick={() => removeProjectManager(item.id, manager)}
+                                          className="hover:bg-white/20 rounded-full p-0.5"
+                                          title="Remove project manager"
                                         >
-                                          <X className="w-3 h-3" />
+                                          <X className="w-2.5 h-2.5" />
                                         </button>
                                       </div>
-                                    </div>
-                                  )}
-                                  <div className="flex gap-1 mb-2">
+                                    ))}
+                                  </div>
+                                  <div className="flex gap-1">
                                     <input
                                       type="text"
-                                      placeholder="Custom tag..."
-                                      value={newTagName}
-                                      onChange={(e) => setNewTagName(e.target.value)}
+                                      placeholder="Enter name or initials..."
+                                      value={newProjectManagerName}
+                                      onChange={(e) => setNewProjectManagerName(e.target.value)}
                                       onKeyPress={(e) => {
-                                        if (e.key === 'Enter' && newTagName.trim()) {
-                                          addTag(item.id, newTagName.trim());
+                                        if (e.key === 'Enter') {
+                                          addProjectManager(item.id);
                                         }
                                       }}
                                       className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                                       autoFocus
                                     />
                                     <button
-                                      onClick={() => newTagName.trim() && addTag(item.id, newTagName.trim())}
-                                      disabled={!newTagName.trim()}
-                                      className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:bg-gray-400"
+                                      onClick={() => addProjectManager(item.id)}
+                                      className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
                                     >
                                       <Plus className="w-3 h-3" />
                                     </button>
                                   </div>
-                                  <div className="flex flex-wrap gap-1 mb-1">
-                                    <div className="text-xs text-gray-500 w-full mb-1 flex items-center justify-between">
-                                      <span>Select tag (replaces current):</span>
-                                      <button
-                                        onClick={() => setShowTagManagerModal(true)}
-                                        className="text-blue-600 hover:text-blue-700 text-xs"
-                                        title="Manage tags"
-                                      >
-                                        Edit presets
-                                      </button>
-                                    </div>
-                                    {predefinedTags.map((tag) => (
-                                      <button
-                                        key={tag.name}
-                                        onClick={async () => {
-                                          await addTag(item.id, tag.name);
-                                          setEditingTags(null);
-                                          setNewTagName('');
-                                        }}
-                                        className={`px-2 py-0.5 ${tag.color} text-white text-xs rounded hover:opacity-80`}
-                                      >
-                                        {tag.name}
-                                      </button>
-                                    ))}
-                                  </div>
                                   <button
-                                    onClick={() => {
-                                      setEditingTags(null);
-                                      setNewTagName('');
+                                    onClick={async () => {
+                                      // If there's text in the input, add it first
+                                      if (newProjectManagerName.trim()) {
+                                        await addProjectManager(item.id);
+                                      }
+                                      setEditingProjectManager(null);
+                                      setNewProjectManagerName('');
                                     }}
                                     className="px-2 py-1 bg-gray-300 text-gray-700 text-xs rounded hover:bg-gray-400 w-full"
                                   >
@@ -921,18 +816,24 @@ export default function FlowBoard() {
                                 </div>
                               ) : (
                                 <div
-                                  onClick={() => setEditingTags(item.id)}
+                                  onClick={() => setEditingProjectManager(item.id)}
                                   className="cursor-pointer hover:bg-gray-50 rounded p-1 -m-1 min-h-[24px]"
                                 >
-                                  {item.tags && item.tags.length > 0 ? (
-                                    <span
-                                      className={`px-2 py-0.5 ${getTagColor(item.tags[0])} text-white text-xs font-medium rounded inline-block`}
-                                    >
-                                      {item.tags[0]}
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-400 text-xs hover:text-blue-600">Click to add tag</span>
-                                  )}
+                                  <div className="flex flex-wrap gap-2">
+                                    {item.projectManagers && item.projectManagers.length > 0 ? (
+                                      item.projectManagers.map((manager, i) => (
+                                        <div
+                                          key={i}
+                                          className="w-7 h-7 rounded-full bg-gradient-to-br from-green-400 to-teal-400 text-white flex items-center justify-center text-xs font-bold"
+                                          title={manager}
+                                        >
+                                          {getInitials(manager)}
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <span className="text-gray-400 text-xs hover:text-blue-600">Click to add managers</span>
+                                    )}
+                                  </div>
                                 </div>
                               )}
                             </td>
@@ -1001,13 +902,20 @@ export default function FlowBoard() {
                                   ))}
                                 </div>
                               </div>
-                              {item.tags && item.tags.length > 0 && (
+                              {item.projectManagers && item.projectManagers.length > 0 && (
                                 <div className="mt-2">
-                                  <span
-                                    className={`px-2 py-0.5 ${getTagColor(item.tags[0])} text-white text-xs font-medium rounded inline-block`}
-                                  >
-                                    {item.tags[0]}
-                                  </span>
+                                  <div className="text-xs text-gray-500 mb-1">Project Managers:</div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {(item.projectManagers || []).map((manager, i) => (
+                                      <div
+                                        key={i}
+                                        className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-teal-400 text-white flex items-center justify-center text-[10px] font-bold"
+                                        title={manager}
+                                      >
+                                        {getInitials(manager)}
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
                               {item.dueDate && (
@@ -1151,111 +1059,6 @@ export default function FlowBoard() {
         </div>
       )}
       
-      {/* Tag Manager Modal */}
-      {showTagManagerModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-[600px] max-w-[90%] max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">🏷️ Manage Tags</h2>
-              <button
-                onClick={() => setShowTagManagerModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <p className="text-sm text-gray-600 mb-6">
-              Customize your tag presets. These will appear as quick-add options when tagging tasks.
-            </p>
-            
-            {/* Add New Tag Form */}
-            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Add New Tag</h3>
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  placeholder="Tag name..."
-                  value={newCustomTagName}
-                  onChange={(e) => setNewCustomTagName(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addCustomTag()}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                  value={newCustomTagColor}
-                  onChange={(e) => setNewCustomTagColor(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {availableColors.map((color) => (
-                    <option key={color.value} value={color.value}>
-                      {color.name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={addCustomTag}
-                  disabled={!newCustomTagName.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center font-medium"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add
-                </button>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-3 py-1 ${newCustomTagColor} text-white text-sm font-medium rounded`}>
-                  {newCustomTagName || 'Preview'}
-                </span>
-              </div>
-            </div>
-            
-            {/* Current Tags List */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-700">Your Tags ({predefinedTags.length})</h3>
-                <button
-                  onClick={resetToDefaultTags}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Reset to Defaults
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {predefinedTags.map((tag) => (
-                  <div
-                    key={tag.name}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100"
-                  >
-                    <span className={`px-2 py-1 ${tag.color} text-white text-xs font-medium rounded`}>
-                      {tag.name}
-                    </span>
-                    <button
-                      onClick={() => removeCustomTag(tag.name)}
-                      className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                      title="Delete tag"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {predefinedTags.length === 0 && (
-                <div className="text-center py-8 text-gray-400">
-                  <p className="text-sm">No tags yet. Add your first tag above!</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex gap-2 pt-4 border-t">
-              <button
-                onClick={() => setShowTagManagerModal(false)}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

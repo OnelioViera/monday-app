@@ -33,9 +33,9 @@ export async function GET() {
         status: 'in-progress',
         priority: 'high',
         assignee: ['John Doe', 'Jane Smith'],
+        projectManagers: ['Sarah PM', 'Alex Lead'],
         dueDate: '2024-12-15',
         progress: 65,
-        tags: ['Design', 'Frontend', 'Urgent'],
         description: 'Create responsive design for Q1 campaign',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -47,9 +47,9 @@ export async function GET() {
         status: 'todo',
         priority: 'medium',
         assignee: ['Jane Smith'],
+        projectManagers: ['Maria Manager'],
         dueDate: '2024-12-20',
         progress: 0,
-        tags: ['Documentation'],
         description: 'Prepare 5 blog posts for content marketing',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -61,9 +61,9 @@ export async function GET() {
         status: 'done',
         priority: 'high',
         assignee: ['Mike Johnson'],
+        projectManagers: [],
         dueDate: '2024-11-10',
         progress: 100,
-        tags: [],
         description: 'Develop comprehensive social media plan',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -77,7 +77,7 @@ export async function GET() {
         assignee: ['Sarah Wilson'],
         dueDate: '2024-12-25',
         progress: 30,
-        tags: ['Review'],
+        projectManagers: ['Tom Director'],
         description: 'Configure email automation workflows',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -91,7 +91,7 @@ export async function GET() {
         assignee: ['Dev Team'],
         dueDate: '2025-01-01',
         progress: 45,
-        tags: ['Backend', 'Feature'],
+        projectManagers: ['Chris Lead', 'PM Amy'],
         description: 'Build REST API endpoints',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -105,7 +105,7 @@ export async function GET() {
         assignee: ['Tech Lead'],
         dueDate: '2024-11-05',
         progress: 100,
-        tags: ['Backend'],
+        projectManagers: ['Backend Lead'],
         description: 'Design MongoDB schema',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -119,7 +119,7 @@ export async function GET() {
         assignee: ['Design Team'],
         dueDate: '2025-01-15',
         progress: 0,
-        tags: ['Design', 'Frontend'],
+        projectManagers: ['Design PM'],
         description: 'Enhance user interface and experience',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -133,7 +133,7 @@ export async function GET() {
         assignee: ['Support Team'],
         dueDate: '2024-12-30',
         progress: 55,
-        tags: ['Feature', 'Review'],
+        projectManagers: ['Product Manager'],
         description: 'Improve new customer onboarding process',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -147,7 +147,7 @@ export async function GET() {
         assignee: ['Tech Writer'],
         dueDate: '2025-01-10',
         progress: 40,
-        tags: ['Documentation'],
+        projectManagers: [],
         description: 'Create comprehensive help documentation',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -161,7 +161,7 @@ export async function GET() {
         assignee: ['Marketing Team'],
         dueDate: '2025-01-20',
         progress: 0,
-        tags: ['Testing'],
+        projectManagers: ['QA Manager'],
         description: 'Gather customer satisfaction feedback',
         createdAt: new Date(),
         updatedAt: new Date()
