@@ -714,30 +714,50 @@ export default function FlowBoard() {
                               )}
                             </td>
                             <td className="p-4">
-                              <select
-                                value={item.status}
-                                onChange={(e) => handleStatusChange(item.id, e.target.value as any)}
-                                className={`px-3 py-1 rounded-full text-white text-sm font-medium ${getStatusColor(item.status)}`}
-                              >
-                                {statusOptions.map(option => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
+                              <div className="relative">
+                                <select
+                                  value={item.status}
+                                  onChange={(e) => handleStatusChange(item.id, e.target.value as any)}
+                                  className={`px-3 py-1 rounded-full text-white text-sm font-medium ${getStatusColor(item.status)} cursor-pointer appearance-none pr-8`}
+                                  style={{
+                                    backgroundImage: 'none'
+                                  }}
+                                >
+                                  {statusOptions.map(option => (
+                                    <option key={option.value} value={option.value} className="bg-white text-gray-900">
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              </div>
                             </td>
                             <td className="p-4">
-                              <select
-                                value={item.priority}
-                                onChange={(e) => handlePriorityChange(item.id, e.target.value as any)}
-                                className={`px-3 py-1 rounded-full text-white text-sm font-medium ${getPriorityColor(item.priority)}`}
-                              >
-                                {priorityOptions.map(option => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
+                              <div className="relative">
+                                <select
+                                  value={item.priority}
+                                  onChange={(e) => handlePriorityChange(item.id, e.target.value as any)}
+                                  className={`px-3 py-1 rounded-full text-white text-sm font-medium ${getPriorityColor(item.priority)} cursor-pointer appearance-none pr-8`}
+                                  style={{
+                                    backgroundImage: 'none'
+                                  }}
+                                >
+                                  {priorityOptions.map(option => (
+                                    <option key={option.value} value={option.value} className="bg-white text-gray-900">
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              </div>
                             </td>
                             <td className="p-4">
                               {editingAssignee === item.id ? (
